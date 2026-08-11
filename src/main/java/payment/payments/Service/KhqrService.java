@@ -35,7 +35,7 @@ public class KhqrService {
 
     public String Generateqr(GenerateQRResquest resquest) {
         String transactionId = resquest.getOrderId();
-        String amount = String.valueOf(resquest.getAmount());
+        String amount = String.format("%.2f", resquest.getAmount());
         String successUrl = "https://yourdomain.com/payment/success";
         String remark = "Order " + transactionId;
         String hash = generateHash(apiKey, transactionId, amount, successUrl, remark);
