@@ -52,7 +52,7 @@ public class KhqrService {
         param.add("hash", hash);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(param, headers);
-        String url = baseUrl + "/" + profileId + "/payment-gateway/v1/payments/qr-api-khqrcc";
+        String url = baseUrl + "/" + profileId + "/payment-gateway/v1/payments/qr-api";
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
