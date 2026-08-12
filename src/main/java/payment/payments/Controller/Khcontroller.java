@@ -1,6 +1,8 @@
 package payment.payments.Controller;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +18,16 @@ import java.util.Map;
 @RequestMapping("/api/payment")
 @RequiredArgsConstructor
 public class Khcontroller {
+
+    private static final Logger log = LoggerFactory.getLogger(Khcontroller.class);
+
     private final KhqrService khqrService;
     private final PaymentStatusStoreHolder statusHolder;
 
     @PostMapping("/generateQR")
     public ResponseEntity<String> GenerateQR(@RequestBody GenerateQRResquest resquest){
         String result = khqrService.Generateqr(resquest);
-        statusHolder.getStore().put(resquest.getOrderId(),"PENDING");
+        statusHolder.getStore().put(resquest.getOrderId(), "PENDING");
         return ResponseEntity.ok(result);
     }
 
@@ -35,18 +40,30 @@ public class Khcontroller {
             String status = (String) payload.get("status");
             String hash = (String) payload.get("hash");
 
+            if (transactionId == null || status == null || hash == null) {
+                log.warn("Webhook payload missing required fields: {}", payload);
+                return ResponseEntity.badRequest()
+                        .body(WebhookResponse.error("missing required fields"));
+            }
+
             boolean valid = khqrService.verifyCallbackHash(reqTime, transactionId, amount, status, hash);
             if (!valid) {
+                log.warn("Webhook signature invalid for transaction {}", transactionId);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(WebhookResponse.error("Invalid signature"));
             }
 
-            if ("SUCCESS".equals(status)) {
+            // match the same case-insensitive check used in KhqrService.isTransactionPaid
+            if (status.equalsIgnoreCase("paid")
+                    || status.equalsIgnoreCase("success")
+                    || status.equalsIgnoreCase("completed")) {
                 statusHolder.getStore().put(transactionId, "PAID");
+                log.info("Transaction {} marked PAID via webhook", transactionId);
             }
 
             return ResponseEntity.ok(WebhookResponse.ok());
         } catch (Exception e) {
+            log.error("Webhook processing failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(WebhookResponse.error("processing failed"));
         }
@@ -57,9 +74,10 @@ public class Khcontroller {
         String status = statusHolder.getStore().getOrDefault(orderId, "PENDING");
         return ResponseEntity.ok(new PaymentStatusStore(orderId, status));
     }
+
     @PostMapping("/cancel/{orderId}")
     public ResponseEntity<?> cancelOrder(@PathVariable String orderId) {
-    statusHolder.cancelOrder(orderId);
-    return ResponseEntity.ok().build();
-}
+        statusHolder.cancelOrder(orderId);
+        return ResponseEntity.ok().build();
+    }
 }

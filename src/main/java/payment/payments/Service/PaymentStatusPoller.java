@@ -1,6 +1,7 @@
 package payment.payments.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +14,18 @@ public class PaymentStatusPoller {
     private final KhqrService khqrService;
     private final PaymentStatusStoreHolder statusHolder;
 
-    // Disabled: check-transaction endpoint returns 404, not usable.
+    @Value("${khqr.polling.enabled:false}")
+    private boolean pollingEnabled;
+
+    // Off by default: check-transaction endpoint was returning 404.
     // Relying on webhook (Khcontroller.handleCallback) instead.
-     @Scheduled(fixedRate = 5000)
+    // Set khqr.polling.enabled=true once the endpoint issue is confirmed fixed.
+    @Scheduled(fixedRate = 5000)
     public void pollPendingPayments() {
+        if (!pollingEnabled) {
+            return;
+        }
+
         Map<String, String> store = statusHolder.getStore();
         for (Map.Entry<String, String> entry : store.entrySet()) {
             String orderId = entry.getKey();
@@ -29,5 +38,4 @@ public class PaymentStatusPoller {
             }
         }
     }
-    
 }
