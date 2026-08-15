@@ -6,6 +6,7 @@ import io.github.tongbora.bakong.dto.BakongResponse;
 import io.github.tongbora.bakong.dto.CheckTransactionRequest;
 import kh.gov.nbc.bakong_khqr.model.KHQRResponse;
 import kh.gov.nbc.bakong_khqr.model.KHQRData;
+import kh.gov.nbc.bakong_khqr.model.KHQRCurrency;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class OrderPaymentService {
 
     public KHQRResponse<KHQRData> generateQrForOrder(String orderId, double amount) {
         BakongRequest request = new BakongRequest(
-                null, amount, null, null, null, null,
+                KHQRCurrency.USD, amount, null, null, null, null,
                 null, 15, orderId, null, null, null,
                 "Order " + orderId, null, null, null
         );
