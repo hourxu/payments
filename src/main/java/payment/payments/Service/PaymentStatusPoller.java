@@ -11,27 +11,30 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PaymentStatusPoller {
 
-    private final KhqrService khqrService;
+    private final OrderPaymentService orderPaymentService;
     private final PaymentStatusStoreHolder statusHolder;
 
-    @Value("${khqr.polling.enabled:false}")
+    @Value("${bakong.polling.enabled:true}")
     private boolean pollingEnabled;
 
-    // Off by default: check-transaction endpoint was returning 404.
-    // Relying on webhook (Khcontroller.handleCallback) instead.
-    // Set khqr.polling.enabled=true once the endpoint issue is confirmed fixed.
     @Scheduled(fixedRate = 5000)
     public void pollPendingPayments() {
         if (!pollingEnabled) {
             return;
         }
 
-        Map<String, String> store = statusHolder.getStore();
+        Map<String, String> store = statusHolder.getStore(); // orderId -> status
+        Map<String, String> md5Store = statusHolder.getMd5Store(); // orderId -> md5
+
         for (Map.Entry<String, String> entry : store.entrySet()) {
             String orderId = entry.getKey();
             String status = entry.getValue();
+
             if ("PENDING".equals(status)) {
-                boolean paid = khqrService.isTransactionPaid(orderId);
+                String md5 = md5Store.get(orderId);
+                if (md5 == null) continue; // no md5 recorded yet, skip
+
+                boolean paid = orderPaymentService.isOrderPaid(md5);
                 if (paid) {
                     store.put(orderId, "PAID");
                 }
