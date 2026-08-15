@@ -21,7 +21,7 @@ public class OrderPaymentService {
         String shortId = orderId.length() > 8 ? orderId.substring(0, 8) : orderId;
 
         BakongRequest request = new BakongRequest(
-                KHQRCurrency.USD, amount, null, null, null, null,
+                KHQRCurrency.USD, amount, "hour", null, null, null,
                 null, 15, shortId, null, null, null,
                 "Order " + shortId, null, null, null
         );
@@ -42,6 +42,13 @@ public class OrderPaymentService {
 
     public boolean isOrderPaid(String md5) {
         BakongResponse response = bakongService.checkTransactionByMD5(new CheckTransactionRequest(md5));
+
+        System.out.println("check-transaction md5=" + md5
+                + " responseCode=" + response.responseCode()
+                + " responseMessage=" + response.responseMessage()
+                + " errorCode=" + response.errorCode()
+                + " data=" + response.data());
+
         return response.responseCode() == 0;
     }
 }
