@@ -24,6 +24,11 @@ public class OrderPaymentService {
         );
 
         KHQRResponse<KHQRData> response = bakongService.generateQR(request);
+
+        if (response.getKHQRStatus().getCode() != 0 || response.getData() == null) {
+            throw new RuntimeException("QR generation failed: " + response.getKHQRStatus().getMessage());
+        }
+
         statusHolder.registerOrder(orderId, response.getData().getMd5());
         return response;
     }
