@@ -21,17 +21,18 @@ public class BakongPaymentController {
     private final OrderPaymentService orderPaymentService;
     private final PaymentStatusStoreHolder statusHolder;
 
-    @PostMapping("/generate-qr")
-    public KHQRResponse<KHQRData> generateQR(@RequestBody Map<String, Object> body) {
+    @PostMapping("/generate-qr-image")
+    public ResponseEntity<byte[]> generateQrImage(@RequestBody Map<String, Object> body) {
         String orderId = (String) body.get("orderId");
         double amount = Double.parseDouble(body.get("amount").toString());
-        return orderPaymentService.generateQrForOrder(orderId, amount);
-    }
 
-    @PostMapping("/qr-image")
-    public ResponseEntity<byte[]> getQRImage(@RequestBody KHQRData qrData) {
-        byte[] image = bakongService.getQRImage(qrData);
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
+        KHQRResponse<KHQRData> response = orderPaymentService.generateQrForOrder(orderId, amount);
+        byte[] image = bakongService.getQRImage(response.getData());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .header("X-Payment-MD5", response.getData().getMd5())
+                .body(image);
     }
 
     @GetMapping("/status/{orderId}")
