@@ -17,7 +17,7 @@ public class PaymentStatusPoller {
     @Value("${bakong.polling.enabled:true}")
     private boolean pollingEnabled;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 15000)
     public void pollPendingPayments() {
         if (!pollingEnabled) {
             return;
