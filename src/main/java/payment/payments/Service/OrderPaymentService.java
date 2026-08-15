@@ -18,12 +18,12 @@ public class OrderPaymentService {
     private final PaymentStatusStoreHolder statusHolder;
 
     public KHQRResponse<KHQRData> generateQrForOrder(String orderId, double amount) {
-        String shortBillNumber = orderId.length() > 20 ? orderId.substring(0, 20) : orderId;
+        String shortId = orderId.length() > 8 ? orderId.substring(0, 8) : orderId;
 
         BakongRequest request = new BakongRequest(
-                KHQRCurrency.USD, amount, "hour", null, null, null,
-                null, 15, shortBillNumber, null, null, null,
-                "Order " + orderId, null, null, null
+                KHQRCurrency.USD, amount, null, null, null, null,
+                null, 15, shortId, null, null, null,
+                "Order " + shortId, null, null, null
         );
 
         KHQRResponse<KHQRData> response = bakongService.generateQR(request);
