@@ -49,8 +49,7 @@ public class BakongPaymentController {
     }
     @PostMapping("/check-transaction")
     public ResponseEntity<BakongResponse> checkTransaction(
-             @RequestBody CheckTransactionRequest request) {
-
+            @RequestBody CheckTransactionRequest request) {
         BakongResponse response = bakongService.checkTransactionByMD5(request);
         return ResponseEntity.ok(response);
     }

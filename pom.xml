@@ -50,9 +50,10 @@
 			<version>1.0.8</version>
 		</dependency>
 		<dependency>
-			<groupId>kh.gov.nbc.bakong_khqr</groupId>
-			<artifactId>sdk-java</artifactId>
-			<version>1.0.0.16</version>
+			<groupId>io.github.tongbora</groupId>
+			<artifactId>bakong-spring-boot-starter</artifactId>
+			<version>1.0.8</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.zxing</groupId>
