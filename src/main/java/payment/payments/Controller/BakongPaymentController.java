@@ -1,5 +1,7 @@
 package payment.payments.Controller;
 
+import io.github.tongbora.bakong.dto.BakongResponse;
+import io.github.tongbora.bakong.dto.CheckTransactionRequest;
 import io.github.tongbora.bakong.service.BakongService;
 import kh.gov.nbc.bakong_khqr.model.KHQRResponse;
 import kh.gov.nbc.bakong_khqr.model.KHQRData;
@@ -44,5 +46,12 @@ public class BakongPaymentController {
     public ResponseEntity<Void> cancelOrder(@PathVariable String orderId) {
         statusHolder.cancelOrder(orderId);
         return ResponseEntity.ok().build();
+    }
+    @PostMapping("/check-transaction")
+    public ResponseEntity<BakongResponse> checkTransaction(
+             @RequestBody CheckTransactionRequest request) {
+
+        BakongResponse response = bakongService.checkTransactionByMD5(request);
+        return ResponseEntity.ok(response);
     }
 }
